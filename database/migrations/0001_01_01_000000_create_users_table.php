@@ -17,7 +17,13 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role', ['super_admin', 'general_manager', 'project_manager', 'employee']);
+            $table->enum('role', [
+                'super_admin',
+                'general_manager',
+                'project_manager',
+                'team_leader',
+                'employee'
+            ]);
             $table->string('department')->nullable();
             $table->string('designation')->nullable();
             $table->string('phone')->nullable();
@@ -26,7 +32,6 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
 
-            // Indexes
             $table->index('role');
             $table->index('status');
             $table->index('department');
