@@ -10,34 +10,63 @@ class EmployeeSalarySeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('role', 'super_admin')->first();
+        // Use Spatie role lookup instead of role column
+        $superAdmin = User::role('super_admin')->first();
+        $gm         = User::role('general_manager')->first();
+        $hr         = User::role('hr')->first();
+        $pm         = User::role('project_manager')->first();
+        $tl         = User::role('team_leader')->first();
+        $employee   = User::role('employee')->first();
 
         $salaries = [
-            'superadmin@sardarit.com' => 80000.00,
-            'gm@sardarit.com'         => 70000.00,
-            'pm@sardarit.com'         => 60000.00,
-            'tl@sardarit.com'         => 50000.00,
-            'john@sardarit.com'       => 45000.00,
-            'jane@sardarit.com'       => 35000.00,
+            [
+                'user_id'        => $superAdmin?->id,
+                'basic_salary'   => 150000,
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+            ],
+            [
+                'user_id'        => $gm?->id,
+                'basic_salary'   => 120000,
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+            ],
+            [
+                'user_id'        => $hr?->id,
+                'basic_salary'   => 80000,
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+            ],
+            [
+                'user_id'        => $pm?->id,
+                'basic_salary'   => 100000,
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+            ],
+            [
+                'user_id'        => $tl?->id,
+                'basic_salary'   => 80000,
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+            ],
+            [
+                'user_id'        => $employee?->id,
+                'basic_salary'   => 60000,
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+            ],
         ];
 
-        foreach ($salaries as $email => $salary) {
-            $user = User::where('email', $email)->first();
+        foreach ($salaries as $salary) {
+            if (!$salary['user_id']) continue;
 
-            if ($user) {
-                EmployeeSalary::firstOrCreate(
-                    [
-                        'user_id'      => $user->id,
-                        'effective_to' => null,
-                    ],
-                    [
-                        'basic_salary'   => $salary,
-                        'effective_from' => $user->joining_date,
-                        'effective_to'   => null,
-                        'created_by'     => $admin->id,
-                    ]
-                );
-            }
+            EmployeeSalary::firstOrCreate(
+                [
+                    'user_id'        => $salary['user_id'],
+                    'effective_from' => $salary['effective_from'],
+                ],
+                $salary
+            );
         }
     }
 }
