@@ -5,30 +5,80 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\RosterAssignment;
 use App\Models\User;
-use App\Models\Shift;
 
 class RosterAssignmentSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin    = User::where('role', 'super_admin')->first();
-        $dayShift = Shift::where('name', 'Day Shift')->first();
+        $superAdmin = User::role('super_admin')->first();
+        $gm         = User::role('general_manager')->first();
+        $hr         = User::role('hr')->first();
+        $pm         = User::role('project_manager')->first();
+        $tl         = User::role('team_leader')->first();
+        $employee   = User::role('employee')->first();
 
-        $users = User::where('status', 'active')->get();
+        $assignedBy = $superAdmin?->id ?? 1;
 
-        foreach ($users as $user) {
+        $rosters = [
+            [
+                'user_id'        => $superAdmin?->id,
+                'shift_id'       => 1,
+                'weekend_days'   => ['friday', 'saturday'],
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+                'assigned_by'    => $assignedBy,
+            ],
+            [
+                'user_id'        => $gm?->id,
+                'shift_id'       => 1,
+                'weekend_days'   => ['friday', 'saturday'],
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+                'assigned_by'    => $assignedBy,
+            ],
+            [
+                'user_id'        => $hr?->id,
+                'shift_id'       => 1,
+                'weekend_days'   => ['friday', 'saturday'],
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+                'assigned_by'    => $assignedBy,
+            ],
+            [
+                'user_id'        => $pm?->id,
+                'shift_id'       => 1,
+                'weekend_days'   => ['friday', 'saturday'],
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+                'assigned_by'    => $assignedBy,
+            ],
+            [
+                'user_id'        => $tl?->id,
+                'shift_id'       => 2,
+                'weekend_days'   => ['friday', 'saturday'],
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+                'assigned_by'    => $assignedBy,
+            ],
+            [
+                'user_id'        => $employee?->id,
+                'shift_id'       => 2,
+                'weekend_days'   => ['friday', 'saturday'],
+                'effective_from' => '2024-01-01',
+                'effective_to'   => null,
+                'assigned_by'    => $assignedBy,
+            ],
+        ];
+
+        foreach ($rosters as $roster) {
+            if (!$roster['user_id']) continue;
+
             RosterAssignment::firstOrCreate(
                 [
-                    'user_id'      => $user->id,
-                    'effective_to' => null,
+                    'user_id'        => $roster['user_id'],
+                    'effective_from' => $roster['effective_from'],
                 ],
-                [
-                    'shift_id'       => $dayShift->id,
-                    'weekend_days'   => ['friday'],
-                    'effective_from' => $user->joining_date,
-                    'effective_to'   => null,
-                    'assigned_by'    => $admin->id,
-                ]
+                $roster
             );
         }
     }

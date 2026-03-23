@@ -5,28 +5,43 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\EmployeePolicyAssignment;
 use App\Models\User;
-use App\Models\AttendancePolicy;
 
 class EmployeePolicyAssignmentSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin          = User::where('role', 'super_admin')->first();
-        $standardPolicy = AttendancePolicy::where('name', 'Standard Policy')->first();
+        $superAdmin = User::role('super_admin')->first();
+        $gm         = User::role('general_manager')->first();
+        $hr         = User::role('hr')->first();
+        $pm         = User::role('project_manager')->first();
+        $tl         = User::role('team_leader')->first();
+        $employee   = User::role('employee')->first();
 
-        $users = User::where('status', 'active')->get();
+        $assignedBy = $superAdmin?->id ?? 1;
 
-        foreach ($users as $user) {
+        $assignments = [
+            $superAdmin?->id,
+            $gm?->id,
+            $hr?->id,
+            $pm?->id,
+            $tl?->id,
+            $employee?->id,
+        ];
+
+        foreach ($assignments as $userId) {
+            if (!$userId) continue;
+
             EmployeePolicyAssignment::firstOrCreate(
                 [
-                    'user_id'      => $user->id,
-                    'effective_to' => null,
+                    'user_id'               => $userId,
+                    'effective_from'        => '2024-01-01',
                 ],
                 [
-                    'attendance_policy_id' => $standardPolicy->id,
-                    'effective_from'       => $user->joining_date,
-                    'effective_to'         => null,
-                    'assigned_by'          => $admin->id,
+                    'user_id'               => $userId,
+                    'attendance_policy_id'  => 1,
+                    'effective_from'        => '2024-01-01',
+                    'effective_to'          => null,
+                    'assigned_by'           => $assignedBy,
                 ]
             );
         }
