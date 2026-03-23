@@ -105,7 +105,7 @@ class AuthService extends BaseService
         return [
             'access_token' => $token,
             'token_type'   => 'bearer',
-            'expires_in'   => config('jwt.ttl') * 60,
+            'expires_in'   => config('jwt.ttl') * 600,
         ];
     }
 }

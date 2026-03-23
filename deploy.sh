@@ -60,7 +60,7 @@ echo ""
 echo "──────────────────────────────────────"
 echo " [5/9] Running database migrations"
 echo "──────────────────────────────────────"
-php artisan migrate --seed
+#php artisan migrate --force --seed
 echo "✔ Migrations completed"
 
 echo ""
