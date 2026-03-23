@@ -23,6 +23,9 @@ class UpdateTeamRequest extends FormRequest
         return [
             'name'      => ['sometimes', 'string', 'max:255', "unique:teams,name,{$teamId}"],
             'leader_id' => ['nullable', 'integer', 'exists:users,id'],
+            'name'          => ['sometimes', 'string', 'max:255', "unique:teams,name,{$teamId}"],
+            'department_id' => ['sometimes', 'integer', 'exists:departments,id'],
+            'leader_id'     => ['nullable', 'integer', 'exists:users,id'],
         ];
     }
 

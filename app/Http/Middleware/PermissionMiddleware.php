@@ -10,18 +10,20 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
-class RoleMiddleware
+class PermissionMiddleware
 {
     use ApiResponseTrait;
 
     /**
-     * Usage: ->middleware('role:super_admin')
-     * Multiple: ->middleware('role:super_admin,general_manager')
+     * Usage in routes:
+     * ->middleware('permission:users.view')
+     * ->middleware('permission:users.view,users.create')  — requires ALL
+     * ->middleware('role:super_admin')                    — role check
      */
     public function handle(
         Request $request,
         Closure $next,
-        string ...$roles
+        string ...$permissions
     ): mixed {
         try {
             $user = JWTAuth::parseToken()->authenticate();
@@ -36,12 +38,18 @@ class RoleMiddleware
                 );
             }
 
-            if (!empty($roles) && !$user->hasAnyRole($roles)) {
-                return $this->forbiddenResponse(
-                    'You do not have permission to access this resource'
-                );
+            // Check permissions if provided
+            if (!empty($permissions)) {
+                foreach ($permissions as $permission) {
+                    if (!$user->hasPermissionTo($permission)) {
+                        return $this->forbiddenResponse(
+                            "You do not have permission to perform this action: {$permission}"
+                        );
+                    }
+                }
             }
 
+            // Bind authenticated user to request
             $request->merge(['auth_user' => $user]);
 
         } catch (TokenExpiredException $e) {

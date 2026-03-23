@@ -29,7 +29,7 @@ class StoreUserRequest extends FormRequest
                                     ->symbols()
                                 ],
             'role'          => ['required', 'in:super_admin,general_manager,project_manager,team_leader,employee'],
-            'department'    => ['nullable', 'string', 'max:100'],
+            'department_id' => ['required', 'integer', 'exists:departments,id'],
             'designation'   => ['nullable', 'string', 'max:100'],
             'phone'         => ['nullable', 'string', 'max:20'],
             'joining_date'  => ['required', 'date', 'before_or_equal:today'],

@@ -21,6 +21,9 @@ class StoreTeamRequest extends FormRequest
         return [
             'name'      => ['required', 'string', 'max:255', 'unique:teams,name'],
             'leader_id' => ['nullable', 'integer', 'exists:users,id'],
+            'name'          => ['required', 'string', 'max:255', 'unique:teams,name'],
+            'department_id' => ['required', 'integer', 'exists:departments,id'],
+            'leader_id'     => ['nullable', 'integer', 'exists:users,id'],
         ];
     }
 

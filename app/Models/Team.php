@@ -11,11 +11,17 @@ class Team extends Model
 
     protected $fillable = [
         'name',
+        'department_id',  // add this
         'leader_id',
         'created_by',
     ];
+    
 
     // =================== Relationships ===================
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
     public function leader()
     {

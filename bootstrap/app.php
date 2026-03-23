@@ -13,8 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'zkteco.sync' => \App\Http\Middleware\ZktecoSyncMiddleware::class,
+            'role'       => \App\Http\Middleware\RoleMiddleware::class,
+            'permission' => \App\Http\Middleware\PermissionMiddleware::class,
+            'zkteco.sync'=> \App\Http\Middleware\ZktecoSyncMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

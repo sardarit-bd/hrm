@@ -5,24 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'employee_code',
         'full_name',
         'email',
         'password',
-        'role',
-        'department',
+        'department_id',  // changed from department string
         'designation',
         'phone',
         'joining_date',
         'status',
     ];
+
 
     protected $hidden = [
         'password',
@@ -33,26 +34,28 @@ class User extends Authenticatable implements JWTSubject
         'joining_date' => 'date',
     ];
 
-    public function isActive(): bool
-    {
-        return $this->status === 'active';
-    }
+    // =================== JWT ===================
 
-    // JWT required methods
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
 
-    public function getJWTCustomClaims()
+    public function getJWTCustomClaims(): array
     {
         return [
-            'role' => $this->role,
+            'role'          => $this->getRoleNames()->first(),
             'employee_code' => $this->employee_code,
+            'permissions'   => $this->getAllPermissions()->pluck('name'),
         ];
     }
 
     // =================== Relationships ===================
+    
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
     public function salaries()
     {
@@ -147,28 +150,38 @@ class User extends Authenticatable implements JWTSubject
 
     // =================== Role Helpers ===================
 
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'super_admin';
+        return $this->hasRole('super_admin');
     }
 
     public function isGeneralManager(): bool
     {
-        return $this->role === 'general_manager';
+        return $this->hasRole('general_manager');
+    }
+
+    public function isHR(): bool
+    {
+        return $this->hasRole('hr');
     }
 
     public function isProjectManager(): bool
     {
-        return $this->role === 'project_manager';
+        return $this->hasRole('project_manager');
     }
 
     public function isTeamLeader(): bool
     {
-        return $this->role === 'team_leader';
+        return $this->hasRole('team_leader');
     }
 
     public function isEmployee(): bool
     {
-        return $this->role === 'employee';
+        return $this->hasRole('employee');
     }
 }

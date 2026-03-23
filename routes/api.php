@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/auth.php';
+    require __DIR__ . '/api/departments.php';
     require __DIR__ . '/api/users.php';
     require __DIR__ . '/api/shifts.php';
     require __DIR__ . '/api/roster.php';
@@ -16,4 +17,5 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/notifications.php';
     require __DIR__ . '/api/holidays.php';
     require __DIR__ . '/api/zkteco.php';
+    require __DIR__ . '/api/roles.php';
 });

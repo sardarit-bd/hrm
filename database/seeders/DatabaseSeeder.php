@@ -9,6 +9,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            DepartmentSeeder::class,
+            RolePermissionSeeder::class,
             UserSeeder::class,
             ShiftSeeder::class,
             AttendancePolicySeeder::class,
@@ -17,6 +19,7 @@ class DatabaseSeeder extends Seeder
             EmployeeSalarySeeder::class,
             RosterAssignmentSeeder::class,
             EmployeePolicyAssignmentSeeder::class,
+            RolePermissionSeeder::class, // add this
         ]);
     }
 }
