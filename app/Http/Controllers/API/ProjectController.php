@@ -134,7 +134,11 @@ class ProjectController extends Controller
             $filters  = $request->only(['status', 'type', 'project_manager_id', 'search', 'from_date', 'to_date']);
             $perPage  = $request->integer('per_page', 15);
             $projects = $this->projectService->getPaginatedProjects($filters, $perPage);
-            return $this->paginatedResponse($projects, 'Projects retrieved successfully');
+
+            return $this->paginatedResponse(
+                ProjectResource::collection($projects),
+                'Projects retrieved successfully'
+            );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }

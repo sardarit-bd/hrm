@@ -93,7 +93,11 @@ class UserController extends Controller
             $filters = $request->only(['role', 'status', 'department', 'search']);
             $perPage = $request->integer('per_page', 15);
             $users   = $this->userService->getPaginatedUsers($filters, $perPage);
-            return $this->paginatedResponse($users, 'Users retrieved successfully');
+
+            return $this->paginatedResponse(
+                UserResource::collection($users),
+                'Users retrieved successfully'
+            );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }

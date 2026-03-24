@@ -103,27 +103,56 @@ trait ApiResponseTrait
     /**
      * Paginated response
      */
+    // protected function paginatedResponse(
+    //     mixed $data,
+    //     string $message = 'Success'
+    // ): JsonResponse {
+    //     return response()->json([
+    //         'status'  => true,
+    //         'message' => $message,
+    //         'data'    => $data->items(),
+    //         'meta'    => [
+    //             'current_page' => $data->currentPage(),
+    //             'per_page'     => $data->perPage(),
+    //             'total'        => $data->total(),
+    //             'last_page'    => $data->lastPage(),
+    //             'from'         => $data->firstItem(),
+    //             'to'           => $data->lastItem(),
+    //         ],
+    //         'links' => [
+    //             'first' => $data->url(1),
+    //             'last'  => $data->url($data->lastPage()),
+    //             'prev'  => $data->previousPageUrl(),
+    //             'next'  => $data->nextPageUrl(),
+    //         ],
+    //     ], Response::HTTP_OK);
+    // }
     protected function paginatedResponse(
         mixed $data,
         string $message = 'Success'
     ): JsonResponse {
+        // If it's a ResourceCollection, the underlying paginator is in ->resource
+        $paginator = $data instanceof \Illuminate\Http\Resources\Json\ResourceCollection
+            ? $data->resource
+            : $data;
+
         return response()->json([
             'status'  => true,
             'message' => $message,
-            'data'    => $data->items(),
+            'data'    => $data->collection ?? $data->items(), // transformed items
             'meta'    => [
-                'current_page' => $data->currentPage(),
-                'per_page'     => $data->perPage(),
-                'total'        => $data->total(),
-                'last_page'    => $data->lastPage(),
-                'from'         => $data->firstItem(),
-                'to'           => $data->lastItem(),
+                'current_page' => $paginator->currentPage(),
+                'per_page'     => $paginator->perPage(),
+                'total'        => $paginator->total(),
+                'last_page'    => $paginator->lastPage(),
+                'from'         => $paginator->firstItem(),
+                'to'           => $paginator->lastItem(),
             ],
-            'links' => [
-                'first' => $data->url(1),
-                'last'  => $data->url($data->lastPage()),
-                'prev'  => $data->previousPageUrl(),
-                'next'  => $data->nextPageUrl(),
+            'links'   => [
+                'first' => $paginator->url(1),
+                'last'  => $paginator->url($paginator->lastPage()),
+                'prev'  => $paginator->previousPageUrl(),
+                'next'  => $paginator->nextPageUrl(),
             ],
         ], Response::HTTP_OK);
     }

@@ -19,18 +19,19 @@ class UpdateProjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'                   => ['sometimes', 'string', 'max:255'],
-            'client_name'            => ['sometimes', 'string', 'max:255'],
-            'description'            => ['nullable', 'string'],
-            'project_manager_id'     => ['sometimes', 'integer', 'exists:users,id'],
-            'type'                   => ['sometimes', 'in:single,milestone,hourly'],
-            'total_budget'           => ['sometimes', 'numeric', 'min:0'],
-            'currency'               => ['sometimes', 'string', 'max:10'],
-            'exchange_rate_snapshot' => ['sometimes', 'numeric', 'min:0'],
-            'start_date'             => ['sometimes', 'date'],
-            'deadline'               => ['sometimes', 'date', 'after:start_date'],
-            'delivered_date'         => ['nullable', 'date'],
-            'status'                 => ['sometimes', 'in:ongoing,delivered,cancelled'],
+            'channel_id'              => ['sometimes', 'integer', 'exists:channels,id'],
+            'name'                    => ['sometimes', 'string', 'max:255'],
+            'client_name'             => ['sometimes', 'string', 'max:255'],
+            'description'             => ['nullable', 'string'],
+            'project_manager_id'      => ['sometimes', 'integer', 'exists:users,id'],
+            'type'                    => ['sometimes', 'in:single,milestone,hourly'],
+            'total_budget'            => ['sometimes', 'numeric', 'min:0'],
+            'currency'                => ['sometimes', 'string', 'max:10'],
+            'exchange_rate_snapshot'  => ['sometimes', 'numeric', 'min:0'],
+            'start_date'              => ['sometimes', 'date'],
+            'deadline'                => ['sometimes', 'date', 'after_or_equal:start_date'],
+            'delivered_date'          => ['nullable', 'date'],
+            'status'                  => ['sometimes', 'in:ongoing,delivered,cancelled'],
         ];
     }
 

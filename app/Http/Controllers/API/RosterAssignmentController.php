@@ -93,7 +93,7 @@ class RosterAssignmentController extends Controller
                 ['user', 'shift', 'assignedBy']
             );
             return $this->paginatedResponse(
-                $rosters,
+                RosterAssignmentResource::collection($rosters),
                 'Roster assignments retrieved successfully'
             );
         } catch (\Throwable $e) {

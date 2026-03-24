@@ -13,9 +13,19 @@ class ShiftRepository extends BaseRepository
     }
 
     /**
-     * Get all fixed shifts
+     * Get all shifts ordered by name
      */
-    public function getFixedShifts(): Collection
+    public function getAllOrdered(): Collection
+    {
+        return $this->model
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Get fixed shifts only
+     */
+    public function getFixed(): Collection
     {
         return $this->model
             ->where('is_fixed', true)
@@ -24,36 +34,13 @@ class ShiftRepository extends BaseRepository
     }
 
     /**
-     * Get all rotating shifts
+     * Get rotating shifts only
      */
-    public function getRotatingShifts(): Collection
+    public function getRotating(): Collection
     {
         return $this->model
             ->where('is_fixed', false)
             ->orderBy('name')
             ->get();
-    }
-
-    /**
-     * Get shifts ordered by start time
-     */
-    public function getAllOrderedByTime(): Collection
-    {
-        return $this->model
-            ->orderBy('start_time')
-            ->get();
-    }
-
-    /**
-     * Check if shift has active roster assignments
-     */
-    public function hasActiveRosterAssignments(int $shiftId): bool
-    {
-        return $this->model
-            ->where('id', $shiftId)
-            ->whereHas('rosterAssignments', function ($q) {
-                $q->whereNull('effective_to');
-            })
-            ->exists();
     }
 }

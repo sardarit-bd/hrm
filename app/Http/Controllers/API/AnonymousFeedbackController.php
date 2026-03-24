@@ -189,7 +189,11 @@ class AnonymousFeedbackController extends Controller
             $filters   = $request->only(['category', 'sentiment', 'quarter']);
             $perPage   = $request->integer('per_page', 15);
             $feedbacks = $this->feedbackService->getPaginatedFeedbacks($filters, $perPage);
-            return $this->paginatedResponse($feedbacks, 'Feedbacks retrieved successfully');
+
+            return $this->paginatedResponse(
+                AnonymousFeedbackResource::collection($feedbacks),
+                'Feedbacks retrieved successfully'
+            );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }

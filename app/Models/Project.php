@@ -10,6 +10,7 @@ class Project extends Model
     use HasFactory;
 
     protected $fillable = [
+        'channel_id',
         'name',
         'client_name',
         'description',
@@ -33,6 +34,10 @@ class Project extends Model
     ];
 
     // =================== Relationships ===================
+    public function channel()
+    {
+        return $this->belongsTo(Channel::class);
+    }
 
     public function projectManager()
     {

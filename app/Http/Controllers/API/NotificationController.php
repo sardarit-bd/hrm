@@ -101,7 +101,10 @@ class NotificationController extends Controller
                 $filters,
                 $perPage
             );
-            return $this->paginatedResponse($notifications, 'Notifications retrieved successfully');
+            return $this->paginatedResponse(
+                NotificationResource::collection($notifications),
+                'Notifications retrieved successfully'
+            );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }

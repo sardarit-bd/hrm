@@ -3,28 +3,28 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Department\StoreDepartmentRequest;
-use App\Http\Requests\Department\UpdateDepartmentRequest;
-use App\Http\Resources\DepartmentResource;
-use App\Services\DepartmentService;
+use App\Http\Requests\Channel\StoreChannelRequest;
+use App\Http\Requests\Channel\UpdateChannelRequest;
+use App\Http\Resources\ChannelResource;
+use App\Services\ChannelService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
-class DepartmentController extends Controller
+class ChannelController extends Controller
 {
     use ApiResponseTrait;
 
     public function __construct(
-        protected DepartmentService $departmentService
+        protected ChannelService $channelService
     ) {}
 
     #[OA\Get(
-        path: '/api/v1/departments',
-        summary: 'List all departments with pagination',
+        path: '/api/v1/channels',
+        summary: 'List all channels with pagination',
         security: [['bearerAuth' => []]],
-        tags: ['Departments'],
+        tags: ['Channels'],
         parameters: [
             new OA\Parameter(
                 name: 'search',
@@ -48,23 +48,20 @@ class DepartmentController extends Controller
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Departments retrieved successfully',
+                description: 'Channels retrieved successfully',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'status', type: 'boolean', example: true),
-                        new OA\Property(property: 'message', type: 'string', example: 'Departments retrieved successfully'),
+                        new OA\Property(property: 'message', type: 'string', example: 'Channels retrieved successfully'),
                         new OA\Property(
                             property: 'data',
                             type: 'array',
                             items: new OA\Items(
                                 properties: [
                                     new OA\Property(property: 'id', type: 'integer', example: 1),
-                                    new OA\Property(property: 'name', type: 'string', example: 'Engineering'),
-                                    new OA\Property(property: 'description', type: 'string', nullable: true),
-                                    new OA\Property(property: 'manager', type: 'object', nullable: true),
+                                    new OA\Property(property: 'name', type: 'string', example: 'Fiverr'),
                                     new OA\Property(property: 'is_active', type: 'boolean', example: true),
-                                    new OA\Property(property: 'teams_count', type: 'integer', example: 3),
-                                    new OA\Property(property: 'users_count', type: 'integer', example: 15),
+                                    new OA\Property(property: 'projects_count', type: 'integer', example: 5),
                                 ]
                             )
                         ),
@@ -78,17 +75,13 @@ class DepartmentController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $filters = $request->only(['search', 'is_active']);
-            $perPage = $request->integer('per_page', 15);
-
-            $departments = $this->departmentService->getPaginatedDepartments(
-                $filters,
-                $perPage
-            );
+            $filters  = $request->only(['search', 'is_active']);
+            $perPage  = $request->integer('per_page', 15);
+            $channels = $this->channelService->getPaginatedChannels($filters, $perPage);
 
             return $this->paginatedResponse(
-                DepartmentResource::collection($departments),
-                'Departments retrieved successfully'
+                ChannelResource::collection($channels),
+                'Channels retrieved successfully'
             );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
@@ -96,8 +89,8 @@ class DepartmentController extends Controller
     }
 
     #[OA\Post(
-        path: '/api/v1/departments',
-        summary: 'Create a new department',
+        path: '/api/v1/channels',
+        summary: 'Create a new channel',
         security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
@@ -107,21 +100,8 @@ class DepartmentController extends Controller
                     new OA\Property(
                         property: 'name',
                         type: 'string',
-                        example: 'Engineering',
-                        description: 'Unique department name'
-                    ),
-                    new OA\Property(
-                        property: 'description',
-                        type: 'string',
-                        nullable: true,
-                        example: 'Software engineering department'
-                    ),
-                    new OA\Property(
-                        property: 'manager_id',
-                        type: 'integer',
-                        nullable: true,
-                        example: 3,
-                        description: 'ID of the department manager'
+                        example: 'Fiverr',
+                        description: 'Unique channel name'
                     ),
                     new OA\Property(
                         property: 'is_active',
@@ -131,24 +111,32 @@ class DepartmentController extends Controller
                 ]
             )
         ),
-        tags: ['Departments'],
+        tags: ['Channels'],
         responses: [
-            new OA\Response(response: 201, description: 'Department created successfully'),
+            new OA\Response(
+                response: 201,
+                description: 'Channel created successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'status', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Channel created successfully'),
+                        new OA\Property(property: 'data', type: 'object'),
+                    ]
+                )
+            ),
             new OA\Response(response: 401, description: 'Unauthorized'),
-            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 403, description: 'Forbidden — GM and Super Admin only'),
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(StoreDepartmentRequest $request): JsonResponse
+    public function store(StoreChannelRequest $request): JsonResponse
     {
         try {
-            $department = $this->departmentService->create(
-                $request->validated()
-            );
+            $channel = $this->channelService->create($request->validated());
 
             return $this->createdResponse(
-                new DepartmentResource($department),
-                'Department created successfully'
+                new ChannelResource($channel),
+                'Channel created successfully'
             );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
@@ -156,10 +144,10 @@ class DepartmentController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/departments/{id}',
-        summary: 'Get department by ID with teams and members',
+        path: '/api/v1/channels/{id}',
+        summary: 'Get channel by ID with all projects',
         security: [['bearerAuth' => []]],
-        tags: ['Departments'],
+        tags: ['Channels'],
         parameters: [
             new OA\Parameter(
                 name: 'id',
@@ -171,21 +159,24 @@ class DepartmentController extends Controller
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Department retrieved successfully',
+                description: 'Channel retrieved successfully',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'status', type: 'boolean', example: true),
-                        new OA\Property(property: 'message', type: 'string', example: 'Department retrieved successfully'),
+                        new OA\Property(property: 'message', type: 'string', example: 'Channel retrieved successfully'),
                         new OA\Property(
                             property: 'data',
                             type: 'object',
                             properties: [
                                 new OA\Property(property: 'id', type: 'integer', example: 1),
-                                new OA\Property(property: 'name', type: 'string', example: 'Engineering'),
-                                new OA\Property(property: 'manager', type: 'object', nullable: true),
-                                new OA\Property(property: 'teams', type: 'array', items: new OA\Items(type: 'object')),
-                                new OA\Property(property: 'teams_count', type: 'integer', example: 3),
-                                new OA\Property(property: 'users_count', type: 'integer', example: 15),
+                                new OA\Property(property: 'name', type: 'string', example: 'Fiverr'),
+                                new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                                new OA\Property(property: 'projects_count', type: 'integer', example: 5),
+                                new OA\Property(
+                                    property: 'projects',
+                                    type: 'array',
+                                    items: new OA\Items(type: 'object')
+                                ),
                             ]
                         ),
                     ]
@@ -193,21 +184,21 @@ class DepartmentController extends Controller
             ),
             new OA\Response(response: 401, description: 'Unauthorized'),
             new OA\Response(response: 403, description: 'Forbidden'),
-            new OA\Response(response: 404, description: 'Department not found'),
+            new OA\Response(response: 404, description: 'Channel not found'),
         ]
     )]
     public function show(int $id): JsonResponse
     {
         try {
-            $department = $this->departmentService->getDepartmentWithDetails($id);
+            $channel = $this->channelService->getChannelWithProjects($id);
 
-            if (!$department) {
-                return $this->notFoundResponse('Department not found');
+            if (!$channel) {
+                return $this->notFoundResponse('Channel not found');
             }
 
             return $this->successResponse(
-                new DepartmentResource($department),
-                'Department retrieved successfully'
+                new ChannelResource($channel),
+                'Channel retrieved successfully'
             );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
@@ -215,21 +206,19 @@ class DepartmentController extends Controller
     }
 
     #[OA\Put(
-        path: '/api/v1/departments/{id}',
-        summary: 'Update department details',
+        path: '/api/v1/channels/{id}',
+        summary: 'Update channel',
         security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: 'name', type: 'string', example: 'Updated Name'),
-                    new OA\Property(property: 'description', type: 'string', nullable: true),
-                    new OA\Property(property: 'manager_id', type: 'integer', nullable: true),
+                    new OA\Property(property: 'name', type: 'string', example: 'Updated Channel'),
                     new OA\Property(property: 'is_active', type: 'boolean', example: true),
                 ]
             )
         ),
-        tags: ['Departments'],
+        tags: ['Channels'],
         parameters: [
             new OA\Parameter(
                 name: 'id',
@@ -239,40 +228,35 @@ class DepartmentController extends Controller
             ),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Department updated successfully'),
+            new OA\Response(response: 200, description: 'Channel updated successfully'),
             new OA\Response(response: 401, description: 'Unauthorized'),
-            new OA\Response(response: 403, description: 'Forbidden'),
-            new OA\Response(response: 404, description: 'Department not found'),
+            new OA\Response(response: 403, description: 'Forbidden — GM and Super Admin only'),
+            new OA\Response(response: 404, description: 'Channel not found'),
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(
-        UpdateDepartmentRequest $request,
-        int $id
-    ): JsonResponse {
+    public function update(UpdateChannelRequest $request, int $id): JsonResponse
+    {
         try {
-            $department = $this->departmentService->update(
-                $id,
-                $request->validated()
-            );
+            $channel = $this->channelService->update($id, $request->validated());
 
             return $this->successResponse(
-                new DepartmentResource($department),
-                'Department updated successfully'
+                new ChannelResource($channel),
+                'Channel updated successfully'
             );
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->notFoundResponse('Department not found');
+            return $this->notFoundResponse('Channel not found');
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }
     }
 
     #[OA\Delete(
-        path: '/api/v1/departments/{id}',
-        summary: 'Delete department permanently',
-        description: 'Cannot delete a department that has active users or teams',
+        path: '/api/v1/channels/{id}',
+        summary: 'Delete channel permanently',
+        description: 'Cannot delete a channel that has projects assigned to it',
         security: [['bearerAuth' => []]],
-        tags: ['Departments'],
+        tags: ['Channels'],
         parameters: [
             new OA\Parameter(
                 name: 'id',
@@ -282,60 +266,57 @@ class DepartmentController extends Controller
             ),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Department deleted successfully'),
+            new OA\Response(response: 200, description: 'Channel deleted successfully'),
             new OA\Response(response: 401, description: 'Unauthorized'),
-            new OA\Response(response: 403, description: 'Forbidden'),
-            new OA\Response(response: 404, description: 'Department not found'),
-            new OA\Response(response: 422, description: 'Cannot delete department with active users or teams'),
+            new OA\Response(response: 403, description: 'Forbidden — GM and Super Admin only'),
+            new OA\Response(response: 404, description: 'Channel not found'),
+            new OA\Response(response: 422, description: 'Cannot delete channel with existing projects'),
         ]
     )]
     public function destroy(int $id): JsonResponse
     {
         try {
-            $department = $this->departmentService->findOrFail($id);
+            $channel = $this->channelService->findOrFail($id);
 
-            // Prevent deletion if department has users or teams
-            if ($department->users()->count() > 0) {
+            if ($channel->projects()->count() > 0) {
                 return $this->errorResponse(
-                    'Cannot delete department that has employees assigned',
+                    'Cannot delete channel that has projects assigned',
                     422
                 );
             }
 
-            if ($department->teams()->count() > 0) {
-                return $this->errorResponse(
-                    'Cannot delete department that has teams assigned',
-                    422
-                );
-            }
-
-            $this->departmentService->delete($id);
+            $this->channelService->delete($id);
 
             return $this->noContentResponse();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->notFoundResponse('Department not found');
+            return $this->notFoundResponse('Channel not found');
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }
     }
 
     #[OA\Get(
-        path: '/api/v1/departments/active',
-        summary: 'Get all active departments',
+        path: '/api/v1/channels/active',
+        summary: 'Get all active channels — for dropdowns',
         security: [['bearerAuth' => []]],
-        tags: ['Departments'],
+        tags: ['Channels'],
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Active departments retrieved successfully',
+                description: 'Active channels retrieved successfully',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'status', type: 'boolean', example: true),
-                        new OA\Property(property: 'message', type: 'string', example: 'Active departments retrieved successfully'),
+                        new OA\Property(property: 'message', type: 'string', example: 'Active channels retrieved successfully'),
                         new OA\Property(
                             property: 'data',
                             type: 'array',
-                            items: new OA\Items(type: 'object')
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: 'id', type: 'integer', example: 1),
+                                    new OA\Property(property: 'name', type: 'string', example: 'Fiverr'),
+                                ]
+                            )
                         ),
                     ]
                 )
@@ -346,11 +327,11 @@ class DepartmentController extends Controller
     public function getActive(): JsonResponse
     {
         try {
-            $departments = $this->departmentService->getActiveDepartments();
+            $channels = $this->channelService->getActiveChannels();
 
             return $this->successResponse(
-                DepartmentResource::collection($departments),
-                'Active departments retrieved successfully'
+                ChannelResource::collection($channels),
+                'Active channels retrieved successfully'
             );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);

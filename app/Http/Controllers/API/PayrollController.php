@@ -132,7 +132,11 @@ class PayrollController extends Controller
             $filters  = $request->only(['user_id', 'payroll_status', 'payroll_month', 'year', 'quarter']);
             $perPage  = $request->integer('per_page', 15);
             $payrolls = $this->payrollService->getPaginatedPayrolls($filters, $perPage);
-            return $this->paginatedResponse($payrolls, 'Payroll records retrieved successfully');
+
+            return $this->paginatedResponse(
+                PayrollRecordResource::collection($payrolls),
+                'Payroll records retrieved successfully'
+            );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }

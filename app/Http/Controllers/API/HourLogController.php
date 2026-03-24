@@ -130,7 +130,11 @@ class HourLogController extends Controller
             ]);
             $perPage = $request->integer('per_page', 15);
             $logs    = $this->hourLogService->getPaginatedLogs($filters, $perPage);
-            return $this->paginatedResponse($logs, 'Hour logs retrieved successfully');
+
+            return $this->paginatedResponse(
+                HourLogResource::collection($logs),
+                'Hour logs retrieved successfully'
+            );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }

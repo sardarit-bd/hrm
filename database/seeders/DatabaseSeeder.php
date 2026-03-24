@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             DepartmentSeeder::class,
+            ChannelSeeder::class,
             RolePermissionSeeder::class,
             UserSeeder::class,
             ShiftSeeder::class,
@@ -19,7 +20,6 @@ class DatabaseSeeder extends Seeder
             EmployeeSalarySeeder::class,
             RosterAssignmentSeeder::class,
             EmployeePolicyAssignmentSeeder::class,
-            RolePermissionSeeder::class, // add this
         ]);
     }
 }

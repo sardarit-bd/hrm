@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/auth.php';
     require __DIR__ . '/api/departments.php';
+    require __DIR__ . '/api/channels.php';
     require __DIR__ . '/api/users.php';
     require __DIR__ . '/api/shifts.php';
     require __DIR__ . '/api/roster.php';

@@ -100,7 +100,11 @@ class TeamController extends Controller
             $filters = $request->only(['search', 'has_leader']);
             $perPage = $request->integer('per_page', 15);
             $teams   = $this->teamService->getPaginatedTeams($filters, $perPage);
-            return $this->paginatedResponse($teams, 'Teams retrieved successfully');
+
+            return $this->paginatedResponse(
+                TeamResource::collection($teams),
+                'Teams retrieved successfully'
+            );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }

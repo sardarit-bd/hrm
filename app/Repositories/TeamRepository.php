@@ -25,7 +25,7 @@ class TeamRepository extends BaseRepository
     ): LengthAwarePaginator {
         $query = $this->model
             ->withCount('teamMembers')
-            ->with(['leader', 'createdBy']);
+            ->with(['leader', 'members']);
 
         if (!empty($filters['search'])) {
             $query->where('name', 'like', "%{$filters['search']}%");
@@ -50,7 +50,7 @@ class TeamRepository extends BaseRepository
     public function getTeamsByLeader(int $leaderId): Collection
     {
         return $this->model
-            ->with(['leader'])
+            ->with(['leader', 'members'])
             ->where('leader_id', $leaderId)
             ->get();
     }

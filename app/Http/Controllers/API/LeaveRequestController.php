@@ -125,7 +125,11 @@ class LeaveRequestController extends Controller
             $filters  = $request->only(['user_id', 'status', 'project_id', 'from_date', 'to_date']);
             $perPage  = $request->integer('per_page', 15);
             $requests = $this->leaveRequestService->getPaginatedRequests($filters, $perPage);
-            return $this->paginatedResponse($requests, 'Leave requests retrieved successfully');
+
+            return $this->paginatedResponse(
+                LeaveRequestResource::collection($requests),
+                'Leave requests retrieved successfully'
+            );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);
         }
