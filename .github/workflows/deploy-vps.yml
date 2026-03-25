@@ -45,10 +45,10 @@ jobs:
           echo "Deploying to $PROJECT_DIR"
           cd "$PROJECT_DIR"
 
-          echo "Pull latest code"
+          echo "Sync code (force clean state)"
           git fetch origin "$BRANCH"
           git checkout "$BRANCH"
-          git pull --ff-only origin "$BRANCH"
+          git reset --hard "origin/$BRANCH"
 
           echo "Install PHP dependencies"
           export COMPOSER_ALLOW_SUPERUSER=1
