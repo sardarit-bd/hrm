@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Notification\MarkReadRequest;
+use App\Http\Requests\Notification\StoreCustomNotificationRequest;
 use App\Http\Resources\NotificationResource;
 use App\Services\NotificationService;
 use App\Traits\ApiResponseTrait;
@@ -94,7 +95,7 @@ class NotificationController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $filters       = $request->only(['is_read', 'type']);
+            $filters       = $request->only(['is_read', 'type', 'sender_type', 'delivery_type']);
             $perPage       = $request->integer('per_page', 15);
             $notifications = $this->notificationService->getForUser(
                 $request->auth_user->id,
@@ -313,6 +314,29 @@ class NotificationController extends Controller
             return $this->successResponse(
                 ['deleted_count' => $count],
                 'Old notifications cleaned up successfully'
+            );
+        } catch (\Throwable $e) {
+            return $this->exceptionResponse($e);
+        }
+    }
+
+    public function sendCustom(StoreCustomNotificationRequest $request): JsonResponse
+    {
+        try {
+            $payload = $request->validated();
+
+            $this->notificationService->sendCustom(
+                $request->auth_user->id,
+                $payload['recipient_ids'],
+                $payload['title'],
+                $payload['message'],
+                $payload['type'],
+                $payload['context'] ?? []
+            );
+
+            return $this->successResponse(
+                null,
+                'Custom notification sent successfully'
             );
         } catch (\Throwable $e) {
             return $this->exceptionResponse($e);

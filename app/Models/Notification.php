@@ -13,9 +13,19 @@ class Notification extends Model
 
     protected $fillable = [
         'user_id',
+        'sender_user_id',
+        'sender_type',
         'title',
         'message',
         'type',
+        'delivery_type',
+        'module',
+        'entity_type',
+        'entity_id',
+        'workflow_step',
+        'workflow_stage',
+        'context',
+        'delivered_at',
         'is_read',
         'read_at',
         'created_at',
@@ -23,7 +33,9 @@ class Notification extends Model
 
     protected $casts = [
         'is_read'    => 'boolean',
+        'context'    => 'array',
         'read_at'    => 'datetime',
+        'delivered_at' => 'datetime',
         'created_at' => 'datetime',
     ];
 
@@ -32,6 +44,11 @@ class Notification extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_user_id');
     }
 
     // =================== Scopes ===================
@@ -54,6 +71,16 @@ class Notification extends Model
     public function scopeByType($query, $type)
     {
         return $query->where('type', $type);
+    }
+
+    public function scopeBySenderType($query, string $senderType)
+    {
+        return $query->where('sender_type', $senderType);
+    }
+
+    public function scopeByDeliveryType($query, string $deliveryType)
+    {
+        return $query->where('delivery_type', $deliveryType);
     }
 
     public function scopeRecent($query, $limit = 20)

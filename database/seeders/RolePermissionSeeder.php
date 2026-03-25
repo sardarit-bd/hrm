@@ -99,6 +99,7 @@ class RolePermissionSeeder extends Seeder
             // Feedback
             'feedback.view',
             'feedback.submit',
+            'feedback.delete',
 
             // Holidays
             'holidays.view',
@@ -108,6 +109,7 @@ class RolePermissionSeeder extends Seeder
 
             // Notifications
             'notifications.view',
+            'notifications.send',
 
             // ZKTeco
             'zkteco.sync',
@@ -182,11 +184,13 @@ class RolePermissionSeeder extends Seeder
             'payroll.update',
             'feedback.view',
             'feedback.submit',
+            'feedback.delete',
             'holidays.view',
             'holidays.create',
             'holidays.update',
             'holidays.delete',
             'notifications.view',
+            'notifications.send',
             'roles.view',
         ]);
 
@@ -225,6 +229,7 @@ class RolePermissionSeeder extends Seeder
             'holidays.update',
             'holidays.delete',
             'notifications.view',
+            'notifications.send',
         ]);
 
         // Project Manager
@@ -252,6 +257,7 @@ class RolePermissionSeeder extends Seeder
             'feedback.submit',
             'holidays.view',
             'notifications.view',
+            'notifications.send',
         ]);
 
         // Team Leader
@@ -267,6 +273,7 @@ class RolePermissionSeeder extends Seeder
             'feedback.submit',
             'holidays.view',
             'notifications.view',
+            'notifications.send',
         ]);
 
         // Employee
@@ -281,6 +288,7 @@ class RolePermissionSeeder extends Seeder
             'feedback.submit',
             'holidays.view',
             'notifications.view',
+            'notifications.send',
             'payroll.view',
         ]);
 

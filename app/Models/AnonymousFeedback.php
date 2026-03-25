@@ -12,7 +12,7 @@ class AnonymousFeedback extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'category',
+        'topic_id',
         'message',
         'sentiment',
         'quarter',
@@ -23,19 +23,26 @@ class AnonymousFeedback extends Model
         'created_at' => 'date',
     ];
 
-    // =================== Scopes ===================
+    // =================== Relationships ===================
 
-    public function scopeByCategory($query, $category)
+    public function topic()
     {
-        return $query->where('category', $category);
+        return $this->belongsTo(Topic::class);
     }
 
-    public function scopeBySentiment($query, $sentiment)
+    // =================== Scopes ===================
+
+    public function scopeByTopic($query, int $topicId)
+    {
+        return $query->where('topic_id', $topicId);
+    }
+
+    public function scopeBySentiment($query, string $sentiment)
     {
         return $query->where('sentiment', $sentiment);
     }
 
-    public function scopeByQuarter($query, $quarter)
+    public function scopeByQuarter($query, string $quarter)
     {
         return $query->where('quarter', $quarter);
     }

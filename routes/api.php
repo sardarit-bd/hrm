@@ -15,6 +15,7 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/teams.php';
     require __DIR__ . '/api/payroll.php';
     require __DIR__ . '/api/feedback.php';
+    require __DIR__ . '/api/topics.php';
     require __DIR__ . '/api/notifications.php';
     require __DIR__ . '/api/holidays.php';
     require __DIR__ . '/api/zkteco.php';

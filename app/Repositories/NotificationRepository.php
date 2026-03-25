@@ -21,7 +21,9 @@ class NotificationRepository extends BaseRepository
         array $filters = [],
         int $perPage = 15
     ): LengthAwarePaginator {
-        $query = $this->model->where('user_id', $userId);
+        $query = $this->model
+            ->with(['sender:id,full_name,email'])
+            ->where('user_id', $userId);
 
         if (isset($filters['is_read'])) {
             $query->where('is_read', $filters['is_read']);
@@ -29,6 +31,14 @@ class NotificationRepository extends BaseRepository
 
         if (!empty($filters['type'])) {
             $query->where('type', $filters['type']);
+        }
+
+        if (!empty($filters['sender_type'])) {
+            $query->where('sender_type', $filters['sender_type']);
+        }
+
+        if (!empty($filters['delivery_type'])) {
+            $query->where('delivery_type', $filters['delivery_type']);
         }
 
         return $query
@@ -92,15 +102,23 @@ class NotificationRepository extends BaseRepository
      */
     public function createForMultipleUsers(
         array $userIds,
-        string $title,
-        string $message,
-        string $type
+        array $payload
     ): void {
         $notifications = array_map(fn($userId) => [
             'user_id'    => $userId,
-            'title'      => $title,
-            'message'    => $message,
-            'type'       => $type,
+            'sender_user_id' => $payload['sender_user_id'] ?? null,
+            'sender_type' => $payload['sender_type'] ?? 'system',
+            'title'      => $payload['title'],
+            'message'    => $payload['message'],
+            'type'       => $payload['type'],
+            'delivery_type' => $payload['delivery_type'] ?? 'system',
+            'module'     => $payload['module'] ?? null,
+            'entity_type' => $payload['entity_type'] ?? null,
+            'entity_id'  => $payload['entity_id'] ?? null,
+            'workflow_step' => $payload['workflow_step'] ?? null,
+            'workflow_stage' => $payload['workflow_stage'] ?? null,
+            'context'    => isset($payload['context']) ? json_encode($payload['context']) : null,
+            'delivered_at' => $payload['delivered_at'] ?? now(),
             'is_read'    => false,
             'created_at' => now(),
         ], $userIds);

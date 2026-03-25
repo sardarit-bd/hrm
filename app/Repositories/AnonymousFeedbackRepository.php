@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\AnonymousFeedback;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class AnonymousFeedbackRepository extends BaseRepository
@@ -20,10 +19,10 @@ class AnonymousFeedbackRepository extends BaseRepository
         array $filters = [],
         int $perPage = 15
     ): LengthAwarePaginator {
-        $query = $this->model->newQuery();
+        $query = $this->model->newQuery()->with('topic');
 
-        if (!empty($filters['category'])) {
-            $query->where('category', $filters['category']);
+        if (!empty($filters['topic_id'])) {
+            $query->where('topic_id', $filters['topic_id']);
         }
 
         if (!empty($filters['sentiment'])) {
@@ -45,28 +44,32 @@ class AnonymousFeedbackRepository extends BaseRepository
     public function getSummaryByQuarter(string $quarter): array
     {
         $feedbacks = $this->model
+            ->with('topic:id,name,slug')
             ->where('quarter', $quarter)
             ->get();
 
         return [
-            'total'       => $feedbacks->count(),
-            'positive'    => $feedbacks->where('sentiment', 'positive')->count(),
-            'neutral'     => $feedbacks->where('sentiment', 'neutral')->count(),
-            'negative'    => $feedbacks->where('sentiment', 'negative')->count(),
-            'by_category' => $feedbacks->groupBy('category')->map->count(),
+            'total'     => $feedbacks->count(),
+            'positive'  => $feedbacks->where('sentiment', 'positive')->count(),
+            'neutral'   => $feedbacks->where('sentiment', 'neutral')->count(),
+            'negative'  => $feedbacks->where('sentiment', 'negative')->count(),
+            'by_topic'  => $feedbacks
+                ->groupBy(fn($item) => $item->topic?->slug ?? 'unknown')
+                ->map->count(),
         ];
     }
 
     /**
-     * Get feedback summary by category
+     * Get feedback summary by topic and sentiment
      */
-    public function getSummaryByCategory(): array
+    public function getSummaryByTopic(): array
     {
         return $this->model
-            ->selectRaw('category, sentiment, count(*) as total')
-            ->groupBy('category', 'sentiment')
+            ->join('topics', 'topics.id', '=', 'anonymous_feedbacks.topic_id')
+            ->selectRaw('topics.slug as topic_slug, anonymous_feedbacks.sentiment, count(*) as total')
+            ->groupBy('topics.slug', 'anonymous_feedbacks.sentiment')
             ->get()
-            ->groupBy('category')
+            ->groupBy('topic_slug')
             ->map(fn($items) => $items->pluck('total', 'sentiment'))
             ->toArray();
     }

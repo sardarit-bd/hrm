@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Repositories\AnonymousFeedbackRepository;
-use App\Services\CacheService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
@@ -26,7 +25,7 @@ class AnonymousFeedbackService extends BaseService
         $quarter = $this->getCurrentQuarter();
 
         $feedback = $this->repository->create([
-            'category'   => $data['category'],
+            'topic_id'   => $data['topic_id'],
             'message'    => $data['message'],
             'sentiment'  => $data['sentiment'],
             'quarter'    => $quarter,
@@ -35,14 +34,15 @@ class AnonymousFeedbackService extends BaseService
 
         // Invalidate summary cache
         $this->cache->forget("feedback.summary.{$quarter}");
+        $this->cache->forget('feedback.summary.topic');
 
         $this->logInfo('Anonymous feedback submitted', [
-            'category'  => $data['category'],
+            'topic_id'  => $data['topic_id'],
             'sentiment' => $data['sentiment'],
             'quarter'   => $quarter,
         ]);
 
-        return $feedback;
+        return $feedback->load('topic');
     }
 
     /**
@@ -68,13 +68,13 @@ class AnonymousFeedbackService extends BaseService
     }
 
     /**
-     * Get summary by category
+     * Get summary by topic
      */
-    public function getSummaryByCategory(): array
+    public function getSummaryByTopic(): array
     {
         return $this->cache->remember(
-            'feedback.summary.category',
-            fn() => $this->repository->getSummaryByCategory(),
+            'feedback.summary.topic',
+            fn() => $this->repository->getSummaryByTopic(),
             3600
         );
     }

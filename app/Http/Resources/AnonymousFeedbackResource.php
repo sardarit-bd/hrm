@@ -11,7 +11,14 @@ class AnonymousFeedbackResource extends JsonResource
     {
         return [
             'id'         => $this->id,
-            'category'   => $this->category,
+            'topic_id'   => $this->topic_id,
+            'topic'      => $this->whenLoaded('topic', function () {
+                return [
+                    'id'   => $this->topic->id,
+                    'name' => $this->topic->name,
+                    'slug' => $this->topic->slug,
+                ];
+            }),
             'message'    => $this->message,
             'sentiment'  => $this->sentiment,
             'quarter'    => $this->quarter,

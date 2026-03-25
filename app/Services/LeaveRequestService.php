@@ -6,6 +6,7 @@ use App\Models\LeaveRequest;
 use App\Repositories\LeaveRequestRepository;
 use App\Repositories\LeaveTypeRepository;
 use App\Services\CacheService;
+use App\Services\NotificationService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -16,7 +17,8 @@ class LeaveRequestService extends BaseService
     public function __construct(
         LeaveRequestRepository $repository,
         CacheService $cache,
-        protected LeaveTypeRepository $leaveTypeRepository
+        protected LeaveTypeRepository $leaveTypeRepository,
+        protected NotificationService $notificationService
     ) {
         parent::__construct($repository, $cache);
     }
@@ -83,7 +85,13 @@ class LeaveRequestService extends BaseService
                 'total_days' => $totalDays,
             ]);
 
-            return $request->load(['user', 'leaveType', 'project']);
+            $request->load(['user', 'leaveType', 'project']);
+
+            $this->safeNotify(function () use ($request) {
+                $this->notificationService->notifyPmForLeave($request);
+            });
+
+            return $request;
         });
     }
 
@@ -133,7 +141,22 @@ class LeaveRequestService extends BaseService
                 'new_status'  => $newStatus,
             ]);
 
-            return $request->load(['user', 'leaveType', 'approvals.approver']);
+            $request->load(['user', 'leaveType', 'project', 'approvals.approver']);
+
+            $this->safeNotify(function () use ($request, $action, $approverId) {
+                if ($action === 'approved') {
+                    $this->notificationService->notifyGmForLeave($request, $approverId);
+                    return;
+                }
+
+                $this->notificationService->notifyEmployeeLeaveUpdated(
+                    $request,
+                    'rejected',
+                    $approverId
+                );
+            });
+
+            return $request;
         });
     }
 
@@ -183,7 +206,17 @@ class LeaveRequestService extends BaseService
                 'new_status'  => $newStatus,
             ]);
 
-            return $request->load(['user', 'leaveType', 'approvals.approver']);
+            $request->load(['user', 'leaveType', 'project', 'approvals.approver']);
+
+            $this->safeNotify(function () use ($request, $action, $approverId) {
+                $this->notificationService->notifyEmployeeLeaveUpdated(
+                    $request,
+                    $action,
+                    $approverId
+                );
+            });
+
+            return $request;
         });
     }
 
@@ -221,5 +254,19 @@ class LeaveRequestService extends BaseService
         string $to
     ): Collection {
         return $this->repository->getUserLeaveInRange($userId, $from, $to);
+    }
+
+    /**
+     * Notification should not block core leave workflow.
+     */
+    private function safeNotify(callable $callback): void
+    {
+        try {
+            $callback();
+        } catch (\Throwable $e) {
+            $this->logWarning('Notification dispatch failed during leave workflow', [
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

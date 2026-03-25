@@ -10,3 +10,7 @@ Route::middleware('permission:notifications.view')->group(function () {
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead']);
     Route::delete('/notifications/cleanup',     [NotificationController::class, 'cleanup']);
 });
+
+Route::middleware('permission:notifications.send')->group(function () {
+    Route::post('/notifications/custom', [NotificationController::class, 'sendCustom']);
+});
