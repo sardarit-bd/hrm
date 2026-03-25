@@ -14,7 +14,7 @@ use OpenApi\Attributes as OA;
     )
 )]
 #[OA\Server(
-    url: 'http://localhost:8000',
+    url: 'https://hrm.sardarit.cloud',
     description: 'Development Server'
 )]
 #[OA\SecurityScheme(
