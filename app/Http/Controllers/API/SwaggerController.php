@@ -13,10 +13,7 @@ use OpenApi\Attributes as OA;
         email: 'admin@sardarit.com'
     )
 )]
-#[OA\Server(
-    url: 'https://hrm.sardarit.cloud',
-    description: 'Development Server'
-)]
+
 #[OA\SecurityScheme(
     securityScheme: 'bearerAuth',
     type: 'http',
