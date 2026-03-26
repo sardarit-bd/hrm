@@ -103,30 +103,6 @@ trait ApiResponseTrait
     /**
      * Paginated response
      */
-    // protected function paginatedResponse(
-    //     mixed $data,
-    //     string $message = 'Success'
-    // ): JsonResponse {
-    //     return response()->json([
-    //         'status'  => true,
-    //         'message' => $message,
-    //         'data'    => $data->items(),
-    //         'meta'    => [
-    //             'current_page' => $data->currentPage(),
-    //             'per_page'     => $data->perPage(),
-    //             'total'        => $data->total(),
-    //             'last_page'    => $data->lastPage(),
-    //             'from'         => $data->firstItem(),
-    //             'to'           => $data->lastItem(),
-    //         ],
-    //         'links' => [
-    //             'first' => $data->url(1),
-    //             'last'  => $data->url($data->lastPage()),
-    //             'prev'  => $data->previousPageUrl(),
-    //             'next'  => $data->nextPageUrl(),
-    //         ],
-    //     ], Response::HTTP_OK);
-    // }
     protected function paginatedResponse(
         mixed $data,
         string $message = 'Success'
