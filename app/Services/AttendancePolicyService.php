@@ -23,11 +23,25 @@ class AttendancePolicyService extends BaseService
      */
     public function getActivePolicies(): Collection
     {
-        return $this->cache->remember(
-            'attendance_policies.active',
+        $cacheKey = 'attendance_policies.active';
+
+        $policies = $this->cache->remember(
+            $cacheKey,
             fn() => $this->repository->getActivePolicies(),
             86400
         );
+
+        if ($policies instanceof Collection) {
+            return $policies;
+        }
+
+        // Recover from stale/invalid serialized cache values (e.g. __PHP_Incomplete_Class).
+        $this->cache->forget($cacheKey);
+
+        $freshPolicies = $this->repository->getActivePolicies();
+        $this->cache->put($cacheKey, $freshPolicies, 86400);
+
+        return $freshPolicies;
     }
 
     /**
@@ -35,10 +49,24 @@ class AttendancePolicyService extends BaseService
      */
     public function getActivePolicyForUser(int $userId): ?AttendancePolicy
     {
-        return $this->cache->rememberActivePolicy(
+        $cacheKey = "policy.active.user.{$userId}";
+
+        $policy = $this->cache->rememberActivePolicy(
             $userId,
             fn() => $this->repository->getCurrentPolicyForUser($userId)
         );
+
+        if ($policy === null || $policy instanceof AttendancePolicy) {
+            return $policy;
+        }
+
+        // Recover from stale/invalid serialized cache values (e.g. __PHP_Incomplete_Class).
+        $this->cache->forgetActivePolicy($userId);
+
+        $freshPolicy = $this->repository->getCurrentPolicyForUser($userId);
+        $this->cache->put($cacheKey, $freshPolicy, 86400);
+
+        return $freshPolicy;
     }
 
     /**

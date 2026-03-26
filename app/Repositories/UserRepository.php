@@ -42,7 +42,11 @@ class UserRepository extends BaseRepository
      */
     public function getByRole(string $role): Collection
     {
-        return $this->getAllBy('role', $role);
+        return $this->model->newQuery()
+            ->whereHas('roles', function ($query) use ($role) {
+                $query->where('name', $role);
+            })
+            ->get();
     }
 
     /**
@@ -63,7 +67,9 @@ class UserRepository extends BaseRepository
         $query = $this->model->newQuery();
 
         if (!empty($filters['role'])) {
-            $query->where('role', $filters['role']);
+            $query->whereHas('roles', function ($roleQuery) use ($filters) {
+                $roleQuery->where('name', $filters['role']);
+            });
         }
 
         if (!empty($filters['status'])) {

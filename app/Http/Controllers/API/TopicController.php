@@ -22,7 +22,16 @@ class TopicController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $filters = $request->only(['search', 'is_active']);
+            $filters = [];
+
+            if ($request->filled('search')) {
+                $filters['search'] = trim((string) $request->query('search'));
+            }
+
+            if ($request->has('is_active')) {
+                $filters['is_active'] = $request->boolean('is_active');
+            }
+
             $perPage = $request->integer('per_page', 15);
             $topics  = $this->topicService->getPaginatedTopics($filters, $perPage);
 
